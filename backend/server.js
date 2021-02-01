@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const { Messages } = require("./dbMessages");
 const Pusher = require("pusher");
+const cors = require("cors");
 
 // app config
 const app = express();
@@ -18,6 +19,7 @@ const pusher = new Pusher({
 
 // middlewares
 app.use(express.json());
+app.use(cors())
 
 // DB config
 const connection_url =
@@ -38,6 +40,17 @@ db.once("open", () => {
 
   changeStream.on("change", (change) => {
     console.log(change, "changeee");
+    if (change.operationType === "insert") {
+      const messageDetails = change.fullDocument;
+      pusher.trigger("messages", "inserted", {
+        name: messageDetails.name,
+        message: messageDetails.message,
+        timestamp: messageDetails.timestamp,
+        recieved: messageDetails.recieved,
+      });
+    } else {
+      console.log("Error triggering pusher!!!!");
+    }
   });
 });
 

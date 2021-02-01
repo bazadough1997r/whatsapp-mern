@@ -2,10 +2,24 @@ import { Avatar, IconButton } from "@material-ui/core";
 import { AttachFile, MoreVert, SearchOutlined } from "@material-ui/icons";
 import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
 import MicIcon from "@material-ui/icons/Mic";
-import React from "react";
+import React, { useState } from "react";
 import "./Chat.css";
+import axios from "./axios";
 
-function Chat() {
+function Chat({ messages }) {
+  const [input, setInput] = useState("");
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    await axios.post("/messages/new", {
+      message: input,
+      name: "DEMO App!",
+      timestamp: "Just now",
+      recieved: "true",
+    });
+    setInput("");
+  };
+
   return (
     <div className="chat">
       <div className="chat__header">
@@ -34,71 +48,16 @@ function Chat() {
       </div>
 
       <div className="chat__body">
-        <p className="chat__message">
-          <span className="chat__name">Rawan</span>
-          this is a msg!
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message">
-          <span className="chat__name">Rawan</span>
-          Heyyyy!
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message chat__reciever">
-          <span className="chat__name">Mira</span>
-          How you doin fella
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message">
-          <span className="chat__name">Rawan</span>I created new whatsapp!
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message chat__reciever">
-          <span className="chat__name">Mira</span>
-          How you doin fella
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message">
-          <span className="chat__name">Rawan</span>I created new whatsapp!
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message chat__reciever">
-          <span className="chat__name">Mira</span>
-          Heyy
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message">
-          <span className="chat__name">Rawan</span>test
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message chat__reciever">
-          <span className="chat__name">Mira</span>
-          How you doin fella
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
-
-        <p className="chat__message">
-          <span className="chat__name">Rawan</span>I created new whatsapp!😎
-          <br></br>
-          <span className="chat__timestamp">{new Date().toUTCString()}</span>
-        </p>
+        {messages.map((message, i) => (
+          <p key={i}
+            className={`chat__message ${message.recieved && "chat__reciever"}`}
+          >
+            <span className="chat__name">{message.name}</span>
+            {message.message}
+            <br></br>
+            <span className="chat__timestamp">{message.timestamp}</span>
+          </p>
+        ))}
       </div>
 
       <div className="chat__footer">
@@ -106,8 +65,15 @@ function Chat() {
           <InsertEmoticonIcon />
         </IconButton>
         <form>
-          <input placeholder="Type a message" type="text" />
-          <button type="submit">Send a message</button>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message"
+            type="text"
+          />
+          <button onClick={sendMessage} type="submit">
+            Send a message
+          </button>
         </form>
         <IconButton>
           <MicIcon />
